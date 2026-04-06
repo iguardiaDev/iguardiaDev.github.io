@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daniel Iguardia — Developer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0a0a0c;
+      --bg2:     #111116;
+      --bg3:     #18181f;
+      --line:    #ffffff12;
+      --accent:  #4fffb0;
+      --accent2: #00d4ff;
+      --text:    #e8e8f0;
+      --muted:   #6b6b80;
+      --mono:    'DM Mono', monospace;
+      --sans:    'Syne', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.035;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* ─── CURSOR DOT ─── */
+    #cursor {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform .1s, width .2s, height .2s, opacity .2s;
+      mix-blend-mode: screen;
+    }
+    #cursor.big { width: 40px; height: 40px; opacity: .4; }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.4rem 3rem;
+      z-index: 100;
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(20px);
+      background: rgba(10,10,12,.7);
+    }
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: .85rem;
+      color: var(--accent);
+      letter-spacing: .08em;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ─── HERO ─── */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 0 3rem 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 80%, black 30%, transparent 100%);
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, #4fffb020 0%, transparent 70%);
+      top: -100px; right: -100px;
+      pointer-events: none;
+    }
+    .hero-glow2 {
+      position: absolute;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #00d4ff15 0%, transparent 70%);
+      bottom: 0; left: 20%;
+      pointer-events: none;
+    }
+
+    .hero-label {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--accent);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp .6s .2s forwards;
+    }
+
+    .hero-name {
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      font-weight: 800;
+      line-height: .95;
+      letter-spacing: -.03em;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp .7s .35s forwards;
+    }
+    .hero-name span { color: var(--accent); }
+
+    .hero-sub {
+      font-family: var(--mono);
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.7;
+      opacity: 0;
+      animation: fadeUp .7s .5s forwards;
+    }
+
+    .hero-cta {
+      margin-top: 3rem;
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp .7s .65s forwards;
+    }
+    .btn {
+      font-family: var(--mono);
+      font-size: .8rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .9rem 2rem;
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .2s;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0a0c;
+      border: 1px solid var(--accent);
+      font-weight: 600;
+    }
+    .btn-primary:hover { background: transparent; color: var(--accent); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem; right: 3rem;
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--muted);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      writing-mode: vertical-rl;
+      display: flex; align-items: center; gap: .6rem;
+    }
+    .hero-scroll::before {
+      content: '';
+      display: block;
+      width: 1px; height: 60px;
+      background: linear-gradient(var(--accent), transparent);
+    }
+
+    /* ─── SECTIONS ─── */
+    section { padding: 7rem 3rem; max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: var(--accent);
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 3rem;
+      line-height: 1.1;
+    }
+
+    /* ─── ABOUT ─── */
+    #about {
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+    .about-text { font-size: 1.05rem; color: #c0c0d0; line-height: 1.9; }
+    .about-text p + p { margin-top: 1.2rem; }
+
+    .stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+      margin-top: .5rem;
+    }
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: border-color .25s;
+    }
+    .stat-card:hover { border-color: var(--accent); }
+    .stat-num {
+      font-size: 2.2rem; font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -.03em;
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-top: .5rem;
+    }
+
+    /* ─── SKILLS ─── */
+    #skills { border-top: 1px solid var(--line); }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+    }
+    .skill-group {
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.8rem;
+      transition: border-color .25s, transform .25s;
+    }
+    .skill-group:hover { border-color: var(--accent2); transform: translateY(-4px); }
+
+    .skill-group-title {
+      font-family: var(--mono);
+      font-size: .7rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 1.2rem;
+    }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .skill-tag {
+      font-family: var(--mono);
+      font-size: .75rem;
+      padding: .35rem .8rem;
+      border-radius: 3px;
+      background: var(--bg3);
+      color: var(--text);
+      border: 1px solid var(--line);
+      transition: all .15s;
+    }
+    .skill-tag:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── EXPERIENCE ─── */
+    #experience { border-top: 1px solid var(--line); }
+
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 8px; bottom: 8px;
+      width: 1px;
+      background: linear-gradient(var(--accent), var(--accent2), transparent);
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 3.5rem;
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: opacity .5s, transform .5s;
+    }
+    .timeline-item.visible { opacity: 1; transform: translateX(0); }
+    .timeline-dot {
+      position: absolute;
+      left: -2.4rem; top: 6px;
+      width: 9px; height: 9px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent);
+    }
+    .timeline-dot.alt { background: var(--accent2); box-shadow: 0 0 12px var(--accent2); }
+
+    .timeline-date {
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .1em;
+      margin-bottom: .4rem;
+    }
+    .timeline-role {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: .2rem;
+    }
+    .timeline-company {
+      font-family: var(--mono);
+      font-size: .82rem;
+      color: var(--accent);
+      margin-bottom: .8rem;
+    }
+    .timeline-desc {
+      color: #9090a8;
+      font-size: .95rem;
+      line-height: 1.75;
+    }
+    .timeline-desc li { margin-left: 1.2rem; margin-bottom: .3rem; }
+
+    /* ─── PROJECTS ─── */
+    #projects { border-top: 1px solid var(--line); }
+
+    .proj-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .proj-card {
+      background: var(--bg2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .25s, transform .3s;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .proj-card.visible { opacity: 1; transform: translateY(0); }
+    .proj-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+    .proj-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #4fffb008 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .proj-num {
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--accent);
+      letter-spacing: .2em;
+      margin-bottom: 1rem;
+    }
+    .proj-name { font-size: 1.1rem; font-weight: 700; margin-bottom: .6rem; }
+    .proj-desc { font-size: .88rem; color: #8888a0; line-height: 1.7; margin-bottom: 1.2rem; }
+    .proj-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .proj-tag {
+      font-family: var(--mono);
+      font-size: .68rem;
+      padding: .25rem .6rem;
+      border-radius: 3px;
+      background: #4fffb012;
+      color: var(--accent);
+      border: 1px solid #4fffb030;
+    }
+
+    /* ─── CONTACT ─── */
+    #contact {
+      border-top: 1px solid var(--line);
+      text-align: center;
+      max-width: 700px;
+    }
+    .contact-big {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+    }
+    .contact-big span { color: var(--accent); }
+    .contact-sub {
+      font-family: var(--mono);
+      font-size: .9rem;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+    }
+    .contact-links { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; }
+    .contact-link {
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: .08em;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 2px;
+      transition: color .2s, border-color .2s;
+    }
+    .contact-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 2rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      nav { padding: 1.2rem 1.5rem; }
+      .nav-links { display: none; }
+      #hero { padding: 0 1.5rem 4rem; }
+      section { padding: 5rem 1.5rem; }
+      #about { grid-template-columns: 1fr; gap: 3rem; }
+      footer { flex-direction: column; gap: .8rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">DI.dev</span>
+  <ul class="nav-links">
+    <li><a href="#about">Sobre mí</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experiencia</a></li>
+    <li><a href="#projects">Proyectos</a></li>
+    <li><a href="#contact">Contacto</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <p class="hero-label">// Fullstack Developer & IT Support</p>
+  <h1 class="hero-name">Daniel<br><span>Iguardia</span></h1>
+  <p class="hero-sub">
+    Estudiante de Ingeniería en Sistemas en Universidad Mariano Gálvez,
+    con experiencia real en soporte IT, bases de datos y desarrollo de software.
+    Inglés C1 · Guatemala.
+  </p>
+  <div class="hero-cta">
+    <a href="#contact" class="btn btn-primary">Hablemos</a>
+    <a href="#projects" class="btn btn-ghost">Ver proyectos</a>
+  </div>
+
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div>
+    <p class="section-label">// 01 — sobre mí</p>
+    <h2 class="section-title">Código, sistemas<br>y soluciones reales</h2>
+    <div class="about-text">
+      <p>
+        Soy Daniel, desarrollador en formación con experiencia laboral real en soporte técnico IT y atención al cliente en empresas como Genpact y Alorica.
+      </p>
+      <p>
+        Me especializo en traducir requerimientos funcionales en soluciones técnicas claras, con conocimiento en C#, SQL, Linux y metodologías ágiles como Scrum.
+      </p>
+      <p>
+        Actualmente cursando Ingeniería en Sistemas, construyendo proyectos propios y enfocado en crecer como desarrollador fullstack.
+      </p>
+    </div>
+  </div>
+  <div>
+    <p class="section-label">// por los números</p>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num">2+</div>
+        <div class="stat-label">Años de experiencia IT</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">C1</div>
+        <div class="stat-label">Nivel de inglés</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3+</div>
+        <div class="stat-label">Lenguajes de programación</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">UMG</div>
+        <div class="stat-label">Ingeniería en Sistemas</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <p class="section-label">// 02 — habilidades</p>
+  <h2 class="section-title">Stack técnico</h2>
+  <div class="skills-grid">
+    <div class="skill-group">
+      <div class="skill-group-title">Lenguajes</div>
+      <div class="skill-tags">
+        <span class="skill-tag">C#</span>
+        <span class="skill-tag">C++</span>
+        <span class="skill-tag">Java</span>
+        <span class="skill-tag">JavaScript</span>
+        <span class="skill-tag">HTML</span>
+        <span class="skill-tag">CSS</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <div class="skill-group-title">Bases de datos</div>
+      <div class="skill-tags">
+        <span class="skill-tag">SQL</span>
+        <span class="skill-tag">MySQL</span>
+        <span class="skill-tag">SQL Server</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <div class="skill-group-title">Sistemas operativos</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Linux</span>
+        <span class="skill-tag">Windows</span>
+        <span class="skill-tag">Mac OS</span>
+        <span class="skill-tag">RockyLinux</span>
+        <span class="skill-tag">CentOS</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <div class="skill-group-title">Herramientas y otros</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Scrum</span>
+        <span class="skill-tag">SalesForce</span>
+        <span class="skill-tag">Payara</span>
+        <span class="skill-tag">Tomcat</span>
+        <span class="skill-tag">.NET</span>
+        <span class="skill-tag">Git</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <p class="section-label">// 03 — experiencia</p>
+  <h2 class="section-title">Historia laboral</h2>
+  <div class="timeline">
+
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">Oct 2024 — Actualidad</div>
+      <div class="timeline-role">IT Support Agent</div>
+      <div class="timeline-company">Genpact</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>Soporte técnico de software empresarial desde Linux</li>
+          <li>Actualización y configuración de impresoras desde servidor Linux</li>
+          <li>Manejo de SQL para actualización y soporte de sistemas</li>
+          <li>Gestión de tickets en SalesForce</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot alt"></div>
+      <div class="timeline-date">Ene 2023 — Jul 2024</div>
+      <div class="timeline-role">Customer Experience Agent</div>
+      <div class="timeline-company">Alorica</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>Coordinación de servicios, manejo y actualización de información personal</li>
+          <li>Soporte técnico a agentes sobre sistemas internos</li>
+          <li>Trabajo con sistemas POS y conocimiento de ventas</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <p class="section-label">// 04 — proyectos</p>
+  <h2 class="section-title">Lo que he construido</h2>
+  <div class="proj-grid">
+
+    <div class="proj-card">
+      <div class="proj-num">// 01</div>
+      <div class="proj-name">Sistema CRUD en C# .NET</div>
+      <div class="proj-desc">Aplicación de escritorio con operaciones completas de creación, lectura, actualización y eliminación de registros.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">C#</span>
+        <span class="proj-tag">.NET</span>
+        <span class="proj-tag">SQL Server</span>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">// 02</div>
+      <div class="proj-name">Servidores Payara & Tomcat</div>
+      <div class="proj-desc">Configuración y administración de servidores de aplicaciones en entornos Linux y Windows para despliegue de software empresarial.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Linux</span>
+        <span class="proj-tag">Payara</span>
+        <span class="proj-tag">Tomcat</span>
+        <span class="proj-tag">Windows</span>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">// 03</div>
+      <div class="proj-name">Configuración RockyLinux / CentOS</div>
+      <div class="proj-desc">Instalación, configuración y hardening de sistemas operativos Linux para entornos de producción.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">RockyLinux</span>
+        <span class="proj-tag">CentOS</span>
+        <span class="proj-tag">SysAdmin</span>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">// 04</div>
+      <div class="proj-name">Base de datos + App de escritorio</div>
+      <div class="proj-desc">Diseño e implementación de base de datos relacional con conexión a aplicación de escritorio para gestión de datos.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">SQL</span>
+        <span class="proj-tag">MySQL</span>
+        <span class="proj-tag">C#</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <p class="section-label">// 05 — contacto</p>
+  <h2 class="contact-big">¿Trabajamos<br><span>juntos?</span></h2>
+  <p class="contact-sub">Abierto a oportunidades de desarrollo, IT y proyectos freelance.</p>
+  <div class="contact-links">
+    <a href="mailto:danieliguardia5@gmail.com" class="contact-link">danieliguardia5@gmail.com</a>
+    <a href="tel:+50253448864" class="contact-link">+502 5344-8864</a>
+    <a href="https://github.com" target="_blank" class="contact-link">GitHub</a>
+    <a href="https://linkedin.com" target="_blank" class="contact-link">LinkedIn</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2025 Daniel Iguardia</span>
+  <span>Guatemala · Diseñado y desarrollado por mí</span>
+</footer>
+
+<script>
+  // ─── CURSOR ───
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .proj-card, .skill-group, .stat-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+  });
+
+  // ─── SCROLL REVEAL ───
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        // stagger project cards
+        if (e.target.classList.contains('proj-card')) {
+          const cards = document.querySelectorAll('.proj-card');
+          cards.forEach((c, i) => {
+            setTimeout(() => c.classList.add('visible'), i * 120);
+          });
+        }
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.timeline-item, .proj-card').forEach(el => observer.observe(el));
+
+  // ─── NAV HIGHLIGHT ───
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 200) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current
+        ? 'var(--accent)' : '';
+    });
+  });
+
+  // ─── HERO GLOW PARALLAX ───
+  const glow = document.querySelector('.hero-glow');
+  document.addEventListener('mousemove', e => {
+    const x = (e.clientX / window.innerWidth - .5) * 40;
+    const y = (e.clientY / window.innerHeight - .5) * 40;
+    glow.style.transform = `translate(${x}px, ${y}px)`;
+  });
+</script>
+
+</body>
+</html>
